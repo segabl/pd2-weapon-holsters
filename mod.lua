@@ -1,76 +1,72 @@
 WeaponHolsters = {
+  -- Align places for specific hold types (default is back)
   hold_align_names = {
     pistol = "hips_right",
     akimbo_pistol = "hips_right",
     bow = "bow"
   },
+  -- Align places for specific weapons
   align_overrides = {
     frankish_crew = "crossbow",
     arblast_crew = "crossbow",
     m134_crew = "minigun"
-  },
-  align_places = {
-    -- Generic align places
-    back = {
-      on_body = true,
-      obj3d_name = Idstring("BackPack1"),
-      local_rot = Rotation(270, 0, 90),
-      local_pos = Vector3(-15, 5, 10)
-    },
-    hips_right = {
-      on_body = true,
-      obj3d_name = Idstring("Hips"),
-      local_rot = Rotation(170, 0, 0),
-      local_pos = Vector3(-20, 5, 0)
-    },
-    hips_left = {
-      on_body = true,
-      obj3d_name = Idstring("Hips"),
-      local_rot = Rotation(190, 0, 0),
-      local_pos = Vector3(20, 5, 0)
-    },
-    
-    -- Specialized align places
-    crossbow = {
-      on_body = true,
-      obj3d_name = Idstring("BackPack1"),
-      local_rot = Rotation(0, 0, 0),
-      local_pos = Vector3(-15, -20, 5)
-    },
-    bow = {
-      on_body = true,
-      obj3d_name = Idstring("BackPack1"),
-      local_rot = Rotation(90, 0, 80),
-      local_pos = Vector3(-20, 10, 10)
-    },
-    minigun = {
-      on_body = true,
-      obj3d_name = Idstring("BackPack1"),
-      local_rot = Rotation(270, 0, 90),
-      local_pos = Vector3(-40, 0, 5)
-    }
   }
 }
+
 
 if RequiredScript == "lib/units/beings/player/huskplayerinventory" then
 
   -- Add new align places
   Hooks:PostHook(HuskPlayerInventory, "init", "weaponholsters_init", function (self)
 
-    for k, v in pairs(WeaponHolsters.align_places) do
-      self._align_places[k] = v
-    end
+    self._align_places.back = {
+      on_body = true,
+      obj3d_name = Idstring("BackPack1"),
+      local_rot = Rotation(270, 0, 90),
+      local_pos = Vector3(-15, 5, 10)
+    }
+    self._align_places.hips_right = {
+      on_body = true,
+      obj3d_name = Idstring("Hips"),
+      local_rot = Rotation(170, 0, 0),
+      local_pos = Vector3(-20, 5, 0),
+    }
+    self._align_places.hips_left = {
+      on_body = true,
+      obj3d_name = Idstring("Hips"),
+      local_rot = Rotation(190, 0, 0),
+      local_pos = Vector3(20, 5, 0)
+    }
+    -- Specialized align places
+    self._align_places.bow = {
+      on_body = true,
+      obj3d_name = Idstring("BackPack1"),
+      local_rot = Rotation(90, 0, 80),
+      local_pos = Vector3(-20, 10, 10)
+    }
+    self._align_places.crossbow = {
+      on_body = true,
+      obj3d_name = Idstring("BackPack1"),
+      local_rot = Rotation(0, 0, 0),
+      local_pos = Vector3(-15, -20, 5)
+    }
+    self._align_places.minigun = {
+      on_body = true,
+      obj3d_name = Idstring("BackPack1"),
+      local_rot = Rotation(270, 0, 90),
+      local_pos = Vector3(-40, 0, 5)
+    }
+    -- Where to align the scond gun of akimbo weapons
+    self._align_places.right_hand.second_gun = self._align_places.left_hand
+    self._align_places.hips_right.second_gun = self._align_places.hips_left
 
   end)
 
   -- Turn off gadgets when holstering weapons
   Hooks:PostHook(HuskPlayerInventory, "_place_selection", "weaponholsters_place_selection", function (self, selection_index, is_equip)
 
-    if is_equip then
-      return
-    end
-    local unit = self._available_selections[selection_index].unit
-    if unit:base().gadget_off then
+    local unit = not is_equip and self._available_selections[selection_index].unit
+    if unit and unit:base().gadget_off then
       unit:base():gadget_off()
     end
 
@@ -82,7 +78,7 @@ if RequiredScript == "lib/units/beings/player/huskplayerinventory" then
     unit:set_local_position(align_place.local_pos or Vector3())
     unit:set_local_rotation(align_place.local_rot or Rotation())
     if unit:base()._second_gun then
-      self:_link_weapon(unit:base()._second_gun, align_place == self._align_places.hips_right and self._align_places.hips_left or self._align_places.left_hand or align_place)
+      self:_link_weapon(unit:base()._second_gun, align_place.second_gun or align_place)
     end
 
   end)
@@ -90,17 +86,14 @@ if RequiredScript == "lib/units/beings/player/huskplayerinventory" then
 end
 
 
-if RequiredScript == "lib/units/weapons/raycastweaponbase" then
+if RequiredScript == "lib/units/weapons/newnpcraycastweaponbase" then
 
-  -- Use different align place for pistols
-  Hooks:PostHook(RaycastWeaponBase, "_create_use_setups", "weaponholsters_create_use_setups", function (self)
-    
-    local w_tweak = tweak_data.weapon[self._name_id]
-    if not w_tweak then
-      return
-    end
-    self._use_data.player.unequip.align_place = WeaponHolsters.align_overrides[self._name_id] or WeaponHolsters.hold_align_names[w_tweak.hold] or self._use_data.player.unequip.align_place
-    
+  -- Check align place overrides
+  Hooks:PostHook(NewNPCRaycastWeaponBase, "_create_use_setups", "weaponholsters_create_use_setups", function (self)
+
+    local new_align_place = WeaponHolsters.align_overrides[self._name_id] or WeaponHolsters.hold_align_names[self:weapon_tweak_data().hold]
+    self._use_data.player.unequip.align_place = new_align_place or self._use_data.player.unequip.align_place
+
   end)
 
 end
