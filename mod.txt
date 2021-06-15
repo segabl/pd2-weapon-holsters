@@ -1,22 +1,21 @@
 {
-  "name" : "Weapon Holsters",
-  "description" : "Displays the currently unused weapons on player models",
-  "author" : "Hoppip",
-  "contact" : "Hoppip#1630",
-  "blt_version" : 2,
-  "color" : "0.043 0.808 0.6",
-  "image" : "mod.png",
-  "version" : "1.3",
-  "updates" : [
-    {
-      "identifier" : "pd2-weapon-holsters",
-      "host": { "meta": "https://updates.hoppip.at/pd2-weapon-holsters" }
-    }
-  ],
-  "hooks" : [
-    { "hook_id" : "lib/units/beings/player/huskplayerinventory", "script_path" : "mod.lua" },
-    { "hook_id" : "lib/units/player_team/huskteamaiinventory", "script_path" : "mod.lua" },
-    { "hook_id" : "lib/units/player_team/teamaiinventory", "script_path" : "mod.lua" },
-    { "hook_id" : "lib/units/weapons/newnpcraycastweaponbase", "script_path" : "mod.lua" }
-  ]
+	"name" : "Weapon Holsters",
+	"description" : "Displays the currently unused weapons on player models",
+	"author" : "Hoppip",
+	"contact" : "Hoppip#1630",
+	"color" : "0.043 0.808 0.6",
+	"image" : "mod.png",
+	"version" : "1.3",
+	"updates" : [
+		{
+			"identifier" : "pd2-weapon-holsters",
+			"host": { "meta": "https://updates.hoppip.at/pd2-weapon-holsters" }
+		}
+	],
+	"hooks" : [
+		{ "hook_id" : "lib/units/beings/player/huskplayerinventory", "script_path" : "mod.lua" },
+		{ "hook_id" : "lib/units/player_team/huskteamaiinventory", "script_path" : "mod.lua" },
+		{ "hook_id" : "lib/units/player_team/teamaiinventory", "script_path" : "mod.lua" },
+		{ "hook_id" : "lib/units/weapons/newnpcraycastweaponbase", "script_path" : "mod.lua" }
+	]
 }
