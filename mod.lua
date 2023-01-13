@@ -60,9 +60,26 @@ end
 
 -- Turn off gadgets when holstering weapons
 function WeaponHolsters.turn_off_gadgets(inventory, selection_index, is_equip)
-	local unit = not is_equip and inventory._available_selections[selection_index].unit
-	if unit and unit:base().gadget_off then
-		unit:base():gadget_off()
+	if is_equip then
+		return
+	end
+
+	local selection = inventory._available_selections[selection_index]
+	local unit = selection.unit
+	if selection.use_data.unequip.align_place then
+		if unit:base().gadget_off then
+			unit:base():gadget_off()
+		end
+	else
+		-- Need to do this for bots since they usually get their weapons added and switched in the same frame
+		-- Code in PlayerInventory:_place_selection disables unequipped weapons instantly but enables equipped weapons after 1 frame
+		-- So if its equipped and unequipped in the same frame it will be set visible after unequip (not sure why it doesnt happen in vanilla)
+		call_on_next_update(function ()
+			if alive(unit) then
+				unit:set_enabled(false)
+				unit:base():on_disabled()
+			end
+		end)
 	end
 end
 
