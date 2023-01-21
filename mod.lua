@@ -70,16 +70,6 @@ function WeaponHolsters.turn_off_gadgets(inventory, selection_index, is_equip)
 		if unit:base().gadget_off then
 			unit:base():gadget_off()
 		end
-	else
-		-- Need to do this for bots since they usually get their weapons added and switched in the same frame
-		-- Code in PlayerInventory:_place_selection disables unequipped weapons instantly but enables equipped weapons after 1 frame
-		-- So if its equipped and unequipped in the same frame it will be set visible after unequip (not sure why it doesnt happen in vanilla)
-		call_on_next_update(function ()
-			if alive(unit) then
-				unit:set_enabled(false)
-				unit:base():on_disabled()
-			end
-		end)
 	end
 end
 
@@ -98,18 +88,6 @@ if RequiredScript == "lib/units/beings/player/huskplayerinventory" then
 	Hooks:PostHook(HuskPlayerInventory, "init", "weaponholsters_init", WeaponHolsters.define_align_places)
 	Hooks:PostHook(HuskPlayerInventory, "_place_selection", "weaponholsters_place_selection", WeaponHolsters.turn_off_gadgets)
 	Hooks:PostHook(HuskPlayerInventory, "_link_weapon", "weaponholsters_link_weapon", WeaponHolsters.adjust_positioning)
-
-elseif RequiredScript == "lib/units/player_team/teamaiinventory" then
-
-	Hooks:PostHook(TeamAIInventory, "init", "weaponholsters_init", WeaponHolsters.define_align_places)
-	Hooks:PostHook(TeamAIInventory, "_place_selection", "weaponholsters_place_selection", WeaponHolsters.turn_off_gadgets)
-	Hooks:PostHook(TeamAIInventory, "_link_weapon", "weaponholsters_link_weapon", WeaponHolsters.adjust_positioning)
-
-elseif RequiredScript == "lib/units/player_team/huskteamaiinventory" then
-
-	Hooks:PostHook(HuskTeamAIInventory, "init", "weaponholsters_init", WeaponHolsters.define_align_places)
-	Hooks:PostHook(HuskTeamAIInventory, "_place_selection", "weaponholsters_place_selection", WeaponHolsters.turn_off_gadgets)
-	Hooks:PostHook(HuskTeamAIInventory, "_link_weapon", "weaponholsters_link_weapon", WeaponHolsters.adjust_positioning)
 
 elseif RequiredScript == "lib/units/weapons/newnpcraycastweaponbase" then
 
