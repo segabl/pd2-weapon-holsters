@@ -15,7 +15,6 @@ WeaponHolsters = {
 
 -- Add new align places
 function WeaponHolsters.define_align_places(inventory)
-	inventory._use_data_alias = "player"
 	inventory._align_places.back = {
 		on_body = true,
 		obj3d_name = Idstring("BackPack1"),
