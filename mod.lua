@@ -52,14 +52,22 @@ function WeaponHolsters.define_align_places(inventory)
 		local_rot = Rotation(270, 0, 90),
 		local_pos = Vector3(-40, 0, 5)
 	}
+
 	-- Where to align the scond gun of akimbo weapons
 	inventory._align_places.right_hand.second_gun = inventory._align_places.left_hand
 	inventory._align_places.hips_right.second_gun = inventory._align_places.hips_left
+
+	-- Mark as modified
+	inventory._has_extra_align_places = true
 end
 
 -- Turn off gadgets when holstering weapons
 function WeaponHolsters.turn_off_gadgets(inventory, selection_index, is_equip)
 	if is_equip then
+		return
+	end
+
+	if not inventory._has_extra_align_places then
 		return
 	end
 
@@ -74,6 +82,10 @@ end
 
 -- Adjust weapon position/rotation and account for akimbo
 function WeaponHolsters.adjust_positioning(inventory, unit, align_place)
+	if not inventory._has_extra_align_places then
+		return
+	end
+
 	unit:set_local_position(align_place.local_pos or Vector3())
 	unit:set_local_rotation(align_place.local_rot or Rotation())
 	if unit:base()._second_gun then
